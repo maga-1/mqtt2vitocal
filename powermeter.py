@@ -37,6 +37,10 @@ logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
+#----------------------------------------------------------------------------
+# Settings
+#----------------------------------------------------------------------------
+
 topic = "strom/wp/restpower"
 mqtt_server = "server.ganzinger.de"
 mqtt_port = 1883
@@ -54,8 +58,6 @@ def run_updating_server():
         di=ModbusSequentialDataBlock(0, [0]*100),
         co=ModbusSequentialDataBlock(0, [0]*100),
         hr=ThreadSafeDataBlock(ModbusSequentialDataBlock(0, [0]*100)),
-
-
         ir=ModbusSequentialDataBlock(0, [0]*100))
 
     global context
@@ -100,7 +102,6 @@ def on_message(mqttc, obj, msg):
         context[slave_id].setValues(register, address, payload)
 
 if __name__ == "__main__":
-#    global context
     mqttc = mqtt.Client()
     mqttc.on_message = on_message
     mqttc.connect_async(mqtt_server, mqtt_port, 60)
