@@ -101,11 +101,16 @@ def on_message(mqttc, obj, msg):
     for address in addresses:
         context[slave_id].setValues(register, address, payload)
 
+def on_connect(client, userdata, flags, rc):
+    client.subscribe(topic, 0)
+
 if __name__ == "__main__":
     mqttc = mqtt.Client()
+    mqttc.enable_logger(log)
     mqttc.on_message = on_message
-    mqttc.connect_async(mqtt_server, mqtt_port, 60)
-    mqttc.subscribe(topic, 0)
+    mqttc.on_connect=on_connect
+    mqttc.connect(mqtt_server, mqtt_port, 60)
+    #mqttc.subscribe(topic, 0)
     mqttc.loop_start()
     run_updating_server()
 
