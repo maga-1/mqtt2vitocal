@@ -6,6 +6,8 @@ The software makes use of the [pymodbus](https://pymodbus.readthedocs.io/en/late
 
 For mqtt, the [paho library](https://www.eclipse.org/paho/index.php?page=clients/python/index.php) has to be installed. Warning: Only use python 3, for python 2 the automatic reconnect to the mqtt broker after connection loss does not work reliably.
 
+The heatpump is connected by a [Waveshare USB to RS485 converter](https://www.waveshare.com/usb-to-rs485.htm), but other devices should work as well.
+
 ## Configuration
 
 At the beginning of `powermeter.py` you can find a configuration section for the mqtt connection:
@@ -18,8 +20,9 @@ At the beginning of `powermeter.py` you can find a configuration section for the
 topic = "electricity/hp/restpower"
 mqtt_server = "localhost"
 mqtt_port = 1883
+serial_port = "/dev/ttyUSB1"
 ```
-`mqtt_server` and `mqtt_port` cover the mqtt connection parameters. `topic` denotes the topic to subscribe for the remaining power. This script expects the remaining power in Watt as an integer value according to the specification of Viessmann (see below).
+`mqtt_server` and `mqtt_port` cover the mqtt connection parameters. `topic` denotes the topic to subscribe for the remaining power. This script expects the remaining power in Watt as an integer value according to the specification of Viessmann (see below). `serial_port` is the RS485 device conneced to the heat pump.
 
 ## Calculation of remaining power
 
@@ -28,9 +31,7 @@ The placement of the original power meter is a bit peculiar. It is assumed that 
 ### Example for Vitocal 200-S
 
 The 200-S expects positive values if power is delivered to the grid. I use the power meter of my grid company to retrieve the current power `gridPower`. The value is *negative* when power is delivered *to* the grid. In addition, I use a separate power meter to measure the current power consumption of the heat pump `hpPower` (always positive). Consquently, I calcuate the remaining power `restPower` with the following formula (I do this in [Node-RED](https://nodered.org/)):
+`restPower = hpPower - gridPower`
 
-$$
-restPower = hpPower - gridPower
-$$
 
 `restPower` should be published on mqtt as an integer value in Watt for use by this script. Please note, we do not have to consider individual phases, although the original power meter does deliver these values. The balance of all phases is sufficient. This script will simulate an even distribution for the heat pump. You can verify this in the photovoltaic diagnosis screen of the heat pump: You should see 1/3 of the remaining power per phase. The total value shows the balanced average power of the last ten minutes.
