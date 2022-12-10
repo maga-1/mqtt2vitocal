@@ -2,6 +2,15 @@
 """
 Pymodbus Server With Updating Thread
 --------------------------------------------------------------------------
+
+This is an example of having a background thread updating the
+context while the server is operating. This can also be done with
+a python thread::
+
+    from threading import Thread
+
+    thread = Thread(target=updating_writer, args=(context,))
+    thread.start()
 """
 # --------------------------------------------------------------------------- #
 # import the modbus libraries we need
@@ -32,9 +41,10 @@ log.setLevel(logging.DEBUG)
 # Settings
 #----------------------------------------------------------------------------
 
-topic = "energy/hp/restpower"
+topic = "electricity/hp/restpower"
 mqtt_server = "localhost"
 mqtt_port = 1883
+serial_port = "/dev/ttyUSB1"
 
 # --------------------------------------------------------------------------- #
 # define your callback process
@@ -68,7 +78,8 @@ def run_updating_server():
     # ----------------------------------------------------------------------- # 
     # run the server you want
     # ----------------------------------------------------------------------- # 
-    StartSerialServer(context, identity=identity, port='/dev/ttyUSB1', parity='E', baudrate='19200', stopbits=1, bytesize=8, framer = ModbusRtuFramer)
+    #StartTcpServer(context, identity=identity, address=("localhost", 5020))
+    StartSerialServer(context, identity=identity, port=serial_port, parity='E', baudrate='19200', stopbits=1, bytesize=8, framer = ModbusRtuFramer)
 
 ######
 # mqtt message handler
